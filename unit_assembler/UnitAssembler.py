@@ -49,5 +49,6 @@ class UnitAssembler:
             {"slides": final_slides, "title": unit_title})
         return presentation
 
-    def assemble_h5p(self, content: dict[str, Any]) -> Buffer:
+    def assemble_h5p(self, content: dict[str, Any]) :
+        # todo: implement
         pass
