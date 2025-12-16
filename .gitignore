@@ -1,6 +1,2 @@
-.feedback
-.env
-.env.*
 __pycache__
-__old*
-test.py
+.env

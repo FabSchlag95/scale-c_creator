@@ -1,0 +1,30 @@
+<task>
+- You previously generated a JSON response for the prompt shown below.
+- The user has since provided feedback. Your task is to update your previous JSON output according to the feedback.
+- Only modify the parts of the JSON output that are directly required by the latest feedback, unless previous feedback must be preserved to maintain correctness.
+- Maintain the same JSON structure/schema as before.
+- Use the instructions and resources shown in the prompt to accurately implement the user's feedback.
+- Always update the `report` field in your updated JSON. In this field, explain in English exactly what you changed and why.
+</task>
+
+<prompt>
+{{prompt}}
+</prompt>
+
+<previous_output>
+{{last_output}}
+</previous_output>
+
+<feedback>
+**Below is the full feedback history between you and the user.**
+- Apply the most recent user feedback (the very last <USER> message (bottom) in the history) as the primary change.
+- Keep all previous feedback already implemented, unless the latest feedback overrides or contradicts it.
+- in the `report`-section only respond to the latest feedback and address the user directly.
+
+## Feedback Chat
+{% for f in feedback_history %}
+{% if f.role == "user" %}<USER>{% else %}<YOU>{% endif %}
+{{f.msg}}
+{% if f.role == "user" %}</USER>{% else %}</YOU>{% endif %}
+{% endfor %}
+</feedback>

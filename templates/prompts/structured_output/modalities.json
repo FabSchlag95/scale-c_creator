@@ -1,0 +1,32 @@
+{
+  "single_choice": {
+      "title": "<Short, descriptive title for the slide's topic.>",
+      "type": "<Task type identifier. Always 'single_choice' for this slide.>",
+      "choices": [
+        {
+          "question": "<The question text, in the target language. Keep it concise and unambiguous.>",
+          "answers": [{"text":"<Possible answer choices. ONLY ONE CORRECT ANSWER.>","correct":"<boolean>"}]
+        }
+      ]
+  },
+  "drag_text": {
+      "title": "<Short, clear title for the exercise in the target language.>",
+      "task_description": "<Instructions for the student. Keep it short, direct, and encouraging.>",
+      "type": "<Task type identifier. Always 'drag_text' for this slide.>",
+      "text_field": "<The Lückentext content. Mark missing words with '*' before and after each word (e.g., *Addition*). Ensure the text is coherent, educational, and aligned with the title's topic.>"
+  },
+  "text": {
+      "title": "<Short, clear title for the slide's topic.>",
+      "type": "<Task type identifier. Always 'text' for this slide.>",
+      "text": "<Main textual content of the slide.>"
+  },
+  "learning_objectives":{
+    "title":"<Always 'Lernziele'>",
+    "type":"<Always `learning_objectives` for this modality>",
+    "teaser":"<short sentence to grasp attention.>",
+    "objective_intro":"<immediately before objectives>",
+    "objectives":[
+      "<objective: Knowledge, fact or technique that the user will learn during the unit.>"
+    ]
+  }
+}

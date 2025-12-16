@@ -1,7 +1,6 @@
 from typing import Any, Tuple
 from jinja2 import Template
 from langchain_core.output_parsers import JsonOutputParser
-from supabase import Client
 
 
 def trim_json_string(text: str) -> Tuple[str,str]:
@@ -26,7 +25,3 @@ def render_and_parse_template(template:Template, context:dict) -> dict:
     rendered = template.render(context)
     parser = JsonOutputParser()
     return parser.parse(rendered)
-
-
-
-

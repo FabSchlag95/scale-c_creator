@@ -1,0 +1,43 @@
+{
+    "elements": [
+        {
+            "x": 5,
+            "y": 5,
+            "width": 90,
+            "height": 10,
+            "action": {
+                "library": "H5P.AdvancedText 1.1",
+                "params": {
+                        "text": {{("<h2>" ~ slide.title ~ "</h2>") | tojson }} 
+                    },
+                "subContentId": "{{uuid}}",
+                "metadata": {
+                "contentType": "Text",
+                "license": "U",
+                "title": "Unbenannt: Text"
+                }
+            },
+            "alwaysDisplayComments": false,
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false,
+            "solution": ""
+        },
+        {
+            "x": 5,
+            "y": 20,
+            "width": 90,
+            "height": 75,
+            "action":{{ slide.element | tojson | safe }},
+            "alwaysDisplayComments": false,
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false,
+            "solution": ""
+        }
+    ]
+}

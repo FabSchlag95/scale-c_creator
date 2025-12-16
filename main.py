@@ -1,25 +1,98 @@
-"""Creator Interface"""
+import json
+import os
+from typing import Any, List, Optional
+from fastapi import HTTPException
+from langchain_openai import ChatOpenAI
+from pydantic import SecretStr, ValidationError
+from langchain.schema import SystemMessage
+from langchain_openai import ChatOpenAI
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from .utils.logger import setup_logger
+from .utils.zip_folder import zip_folder
 
-app = FastAPI()
+from .output_validation.slides import ParsedResponseModel
+from .templating import forge_json_output_schema, forge_system_prompt, parse_model_response
+from .utils.error_handling import error_to_dict
+from .utils.parsers import trim_and_parse
+from .utils.schemas import Modality
 
 
-# CORS configuration
-ALLOWED_ORIGINS = ["http://localhost:5173", "http://localhost:8000"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+if os.path.exists(".env"):
+    from dotenv import load_dotenv
 
-@app.get("/health_check")
-def health_check():
-    return {"status": "ok"}
+    load_dotenv()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8101, reload=True)
+# Environment configuration
+OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY") or ""
+OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL") or ""
+API_KEY: str = os.getenv("API_KEY") or ""
+
+if not OPENROUTER_API_KEY or not OPENROUTER_BASE_URL:
+    raise RuntimeError(
+        "Missing OpenRouter API key or base URL in environment variables.")
+
+
+def create(model_props: dict[str, Any], prompt_props: dict[str, Any], prompt_template="system_base", logger=setup_logger()):
+
+    modalities: List[Modality] | None = prompt_props.get("modalities")
+    output_schema = forge_json_output_schema(
+        modalities) if modalities else None
+
+    if output_schema:
+        logger.debug(f"OUTPUT SCHEMA:\n{output_schema[:500]}\n{50*"*"}")
+
+    system_prompt = forge_system_prompt(
+        config={
+            **prompt_props,
+            "output_schema": output_schema,
+        },
+        template=prompt_template
+    )
+    system_msg = SystemMessage(content=system_prompt)
+    logger.debug(f"PROMPT:\n{system_prompt[:500]}\n{50*"*"}")
+
+    llm = _build_llm(**model_props)
+
+    initial_response = llm.invoke([system_msg,]).content
+    logger.debug(f"RESPONSE:\n{initial_response}\n{50*"*"}")
+    parsed_response = trim_and_parse(str(initial_response))
+
+    error = _validate_parsed_response(parsed_response)
+
+    return initial_response, parsed_response, system_prompt, error
+
+
+def manufacture_h5p(content: dict[str, Any], unit_title="unit"):
+    content_json = parse_model_response(content)
+
+    # Manipulate h5p.json for title
+    with open(".out/h5p.json", encoding="utf-8") as f:
+        h5p_json = json.load(f)
+        h5p_json["title"] = unit_title
+    buffer = zip_folder(".out/Unit", [
+        {"path": "content", "filename": "content.json", "content": content_json},
+        {"path": "", "filename": "h5p.json",
+            "content": json.dumps(h5p_json, ensure_ascii=False)},
+    ])
+    return buffer
+
+
+# Internal helpers (no API contract changes)
+def _build_llm(**keys) -> ChatOpenAI:
+    return ChatOpenAI(
+        **keys,
+        base_url=OPENROUTER_BASE_URL,
+        api_key=SecretStr(OPENROUTER_API_KEY),
+    )
+
+
+def _validate_parsed_response(parsed: dict) -> Optional[dict]:
+    try:
+        ParsedResponseModel.model_validate(parsed)
+        return None
+    except ValidationError as e:
+        err = HTTPException(
+            status_code=400, detail=f"Invalid response format: {e}")
+        err_dict = error_to_dict(err)
+        err_dict["is_validation_error"] = True
+        return err_dict

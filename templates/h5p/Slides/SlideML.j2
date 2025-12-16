@@ -1,0 +1,113 @@
+{
+    "elements": [
+        {
+            "x": 0,
+            "y": 0,
+            "width": 100,
+            "height": 15.062379769932909,
+            "action": {
+                "library": "H5P.Shape 1.0",
+                "params": {
+                "shape": {
+                    "fillColor": "rgb(156, 13, 13)",
+                    "borderWidth": 0,
+                    "borderStyle": "solid",
+                    "borderColor": "rgba(0, 0, 0, 0)",
+                    "borderRadius": 0
+                },
+                "type": "rectangle",
+                "line": {
+                    "borderColor": "#000000",
+                    "borderWidth": "1",
+                    "borderStyle": "solid"
+                }
+                },
+                "metadata": { "contentType": "Shapes" },
+                "subContentId": "e7e155a9-d8fb-4422-9f0a-50193fa9034f"
+            },
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false
+        },
+        {% if "ernziele" in slide.title or "inführung" in slide.title%}
+        {
+            "x": 84.9673202614379,
+            "y": 0,
+            "width": 13.376579520697168,
+            "height": 25.47500290488753,
+            "action": {
+                "library": "H5P.Image 1.1",
+                "params": {
+                "decorative": true,
+                "contentName": "Image",
+                "expandImage": "Expand Image",
+                "minimizeImage": "Minimize Image",
+                "file": {
+                    "path": "images/image-dKYOBXnT.png",
+                    "mime": "image/png",
+                    "copyright": { "license": "U" },
+                    "width": 334,
+                    "height": 322
+                }
+                },
+                "subContentId": "511f5355-362f-471f-82b7-3759e0094fe3",
+                "metadata": {
+                "contentType": "Image",
+                "license": "U",
+                "title": "Untitled Image",
+                "authors": [],
+                "changes": []
+                }
+            },
+            "alwaysDisplayComments": false,
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false,
+            "solution": ""
+        },
+        {% endif %}
+        {
+            "x": 2.178649237472767,
+            "y": 3.227652807842766,
+            "width": 83.87799564270152,
+            "height": 10.758842692809221,
+            "action": {
+                "library": "H5P.AdvancedText 1.1",
+                "params": {
+                        "text": {{("<h2 style=\"color:#ecf0f1\">" ~ slide.title ~ "</h2>") | tojson }} 
+                    },
+                "subContentId": "{{uuid}}",
+                "metadata": {
+                "contentType": "Text",
+                "license": "U",
+                "title": "Unbenannt: Text"
+                }
+            },
+            "alwaysDisplayComments": false,
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false,
+            "solution": ""
+        },
+        {
+            "x": 2.178649237472767,
+            "y": 19.365916847056596,
+            "width": 95.61002178649238,
+            "height": 78.642444925484256,
+            "action":{{ slide.element | tojson | safe }},
+            "alwaysDisplayComments": false,
+            "backgroundOpacity": 0,
+            "displayAsButton": false,
+            "buttonSize": "big",
+            "goToSlideType": "specified",
+            "invisible": false,
+            "solution": ""
+        }
+    ]
+}

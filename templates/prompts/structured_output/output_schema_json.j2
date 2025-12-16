@@ -1,0 +1,43 @@
+# Overview
+- You will build a complex output schema by assembling smaller, clearly defined chunks.
+- **## Main Schema** is the wrapper that contains all other content.
+- **## Modalities** specifies the exact JSON shape for each modality (slide type).
+- Use `<description>` blocks as construction guidance only; they must **not** appear in the final JSON.
+- `<format>` shows the canonical JSON structure.
+- String values may contain meta information written in the format `"<...>"`.  
+- Do not include the `<` or `>` characters themselves in your output. 
+- In your final output, emit **pure JSON**—no type hints, no descriptions, no trailing commas.
+- Always reply with the full JSON structure no matter what feedback is provided by the user.
+- CREATE VALID JSON. DO NOT INCLUDE ANY OWN COMMENTS.
+- Use HTML-tags such as strong, headlines, or paragraph to structure the content in each modality.
+
+
+# Schemas
+## Main Schema
+<description>
+- This is the overarching schema structure.
+- Populate the `slides` array with modalities of your choice, selected from those listed in **## Modalities**.
+</description>
+<format>
+```json
+{   
+    "report": "<A comment or description on how you created the learning unit or implemented user feedback.> [english]"
+    "title":"<Descriptive title for this learning unit.>",
+    "slides":[{% for modality in modalities %}{% if modality.selected %}{{modality.id}}{% endif %}{% if not loop.last %} | {% endif %}{% endfor %}]
+}
+```
+</format>
+
+## Modality Schemas
+{% for modality in modalities %}{% if modality.selected %}
+### {{modality.id}}
+<description>
+{{modality.description}}
+</description>
+<format>
+```json
+{{modality.format}}
+```
+</format>
+---
+{% endif %}{% endfor %}
