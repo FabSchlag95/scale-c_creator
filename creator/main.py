@@ -1,38 +1,24 @@
 import json
 import os
 from typing import Any, List, Optional
-from fastapi import HTTPException
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr, ValidationError
 from langchain.schema import SystemMessage
-from langchain_openai import ChatOpenAI
 
 from .utils.logger import setup_logger
 from .utils.zip_folder import zip_folder
 
 from .output_validation.slides import ParsedResponseModel
 from .templating import forge_json_output_schema, forge_system_prompt, parse_model_response
-from .utils.error_handling import error_to_dict
 from .utils.parsers import trim_and_parse
 from .utils.schemas import Modality
-
-
-if os.path.exists(".env"):
-    from dotenv import load_dotenv
-
-    load_dotenv()
 
 # Environment configuration
 OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY") or ""
 OPENROUTER_BASE_URL: str = os.getenv("OPENROUTER_BASE_URL") or ""
-API_KEY: str = os.getenv("API_KEY") or ""
-
-if not OPENROUTER_API_KEY or not OPENROUTER_BASE_URL:
-    raise RuntimeError(
-        "Missing OpenRouter API key or base URL in environment variables.")
 
 
-def create(model_props: dict[str, Any], prompt_props: dict[str, Any], prompt_template="system_base", logger=setup_logger()):
+def create(model_props: dict[str, Any], prompt_props: dict[str, Any], prompt_template="system_base", logger=setup_logger(), openrouter_api_key=OPENROUTER_API_KEY, openrouter_base_url=OPENROUTER_BASE_URL):
 
     modalities: List[Modality] | None = prompt_props.get("modalities")
     output_schema = forge_json_output_schema(
@@ -51,7 +37,7 @@ def create(model_props: dict[str, Any], prompt_props: dict[str, Any], prompt_tem
     system_msg = SystemMessage(content=system_prompt)
     logger.debug(f"PROMPT:\n{system_prompt[:500]}\n{50*"*"}")
 
-    llm = _build_llm(**model_props)
+    llm = _build_llm(openrouter_api_key,openrouter_base_url,**model_props)
 
     initial_response = llm.invoke([system_msg,]).content
     logger.debug(f"RESPONSE:\n{initial_response}\n{50*"*"}")
@@ -78,21 +64,17 @@ def manufacture_h5p(content: dict[str, Any], unit_title="unit"):
 
 
 # Internal helpers (no API contract changes)
-def _build_llm(**keys) -> ChatOpenAI:
+def _build_llm(key, url,**keys) -> ChatOpenAI:
     return ChatOpenAI(
         **keys,
-        base_url=OPENROUTER_BASE_URL,
-        api_key=SecretStr(OPENROUTER_API_KEY),
+        base_url=url,
+        api_key=SecretStr(key),
     )
 
 
-def _validate_parsed_response(parsed: dict) -> Optional[dict]:
+def _validate_parsed_response(parsed: dict) -> Exception|None:
     try:
         ParsedResponseModel.model_validate(parsed)
         return None
     except ValidationError as e:
-        err = HTTPException(
-            status_code=400, detail=f"Invalid response format: {e}")
-        err_dict = error_to_dict(err)
-        err_dict["is_validation_error"] = True
-        return err_dict
+        return e
