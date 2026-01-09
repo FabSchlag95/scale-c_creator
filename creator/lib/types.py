@@ -1,13 +1,10 @@
 from typing import Literal, TypedDict, Dict, Optional
 
 
-class TemplatePaths(TypedDict):
-    jinja_templates_path: str
-    unit_template_path: str
-
 
 class Settings(TypedDict):
-    template_paths: TemplatePaths
+    jinja_templates_path: str
+    unit_template_path: str
 
 
 class Defaults(TypedDict):

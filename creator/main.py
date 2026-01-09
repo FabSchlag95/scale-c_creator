@@ -88,5 +88,3 @@ class Creator:
             return self._content_creator.predictor.history[0]["response"].choices[0].message.content
         except:
             return None
-
-

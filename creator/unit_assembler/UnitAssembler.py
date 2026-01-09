@@ -15,12 +15,12 @@ from . import preprocess
 FOLDER_PATH = Path(__file__).resolve().parent
 
 class UnitAssembler:
-    _config: AssemblerConfig | dict[str, Any] | None = None
+    _config: AssemblerConfig
     _unit_template_path: str | None = None
     _jinja_templates_path: str | None = None
     _templates: dict[str, Template] | None = None
 
-    def __init__(self, config: AssemblerConfig | dict[str, Any] | None = None) -> None:
+    def __init__(self, config: AssemblerConfig | dict[str, Any] = {}) -> None:
         type(self)._ensure_initialized(config)
 
     @classmethod
