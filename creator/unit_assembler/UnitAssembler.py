@@ -15,20 +15,22 @@ from . import preprocess
 FOLDER_PATH = Path(__file__).resolve().parent
 
 class UnitAssembler:
-    _config: AssemblerConfig
+    _config: AssemblerConfig | None = None 
     _unit_template_path: str | None = None
     _jinja_templates_path: str | None = None
     _templates: dict[str, Template] | None = None
 
-    def __init__(self, config: AssemblerConfig | dict[str, Any] = {}) -> None:
-        type(self)._ensure_initialized(config)
+    @classmethod
+    def set_config(cls, config: AssemblerConfig | dict[str, Any] = {}) -> None:
+        cls._ensure_initialized(config)
 
     @classmethod
     def _ensure_initialized(cls, config: AssemblerConfig | dict[str, Any] | None = None) -> None:
         if cls._config is not None and config is None:
             return
 
-        cls._config = load_yaml(FOLDER_PATH / "config.yml")
+        cls._config = load_yaml(FOLDER_PATH / "config.yml")    
+
         if config:
             cls._config.update(config)  # type: ignore
 

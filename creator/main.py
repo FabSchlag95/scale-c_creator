@@ -36,7 +36,8 @@ class Creator:
                  **model_props) -> None:
         
         self._content_creator = ContentCreator(model_props=model_props)
-        self._unit_assembler = UnitAssembler(unit_assembler_props)
+        self._unit_assembler = UnitAssembler
+        self._unit_assembler.set_config(unit_assembler_props)
         if signature_class:
             self._content_creator.set_lu_signature(signature_class)
         elif slide_dicts:
