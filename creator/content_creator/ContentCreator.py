@@ -1,5 +1,5 @@
 
-from typing import Any, Type
+from typing import Any, Type, Union
 from warnings import warn
 import dspy
 from dspy import Signature, Prediction, ChainOfThought, Module
@@ -30,8 +30,8 @@ class LEARNING_UNIT(dspy.Signature):
 
 
 class REWORK_LEARNING_UNIT(dspy.Signature):
-    last_output: type[Signature]|dict[str,Any] = dspy.InputField()
-    user_feedback_history = dspy.InputField() 
+    last_output: type[Signature] | dict[str, Any] = dspy.InputField()
+    user_feedback_history = dspy.InputField()
     title: str = dspy.OutputField()
 
 
@@ -112,7 +112,7 @@ class ContentCreator:
          class Unit(Signature):
             title: str
             slides: list[type[Signature]] | type[Signature]
-        
+
         :param self: Description
         :param lu_sig: Description
         :type lu_sig: Type[Signature]
@@ -121,33 +121,42 @@ class ContentCreator:
             warn("learning unit's signature already set! Overwritting...")
         self._lu_sig = lu_sig
 
-    def set_lu_signature_with_json(self, slides: list[SignatureSlide], **kwargs):
+    def set_lu_signature_with_json(self, slides: list[SignatureSlide], free_choice=False, **kwargs):
         if self._lu_sig:
             warn("learning unit signature already set! Overwritting...")
-        self._lu_sig = self._default_unit.insert(-1, "slides",
-                                                 dspy.OutputField(), _to_signature(slides))
+        if free_choice:
+            _types = [MAP_R[slide["type"]] for slide in slides]
+            _slide_type = Union[_types]
+            self._lu_sig = self._default_unit.insert(-1, "slides",
+                                                     dspy.OutputField(desc=f"For the possible slides types, take in regard these instructions:\n\n {"\n\n".join([f'##{slide["name"]}\n{slide["desc"]}' for slide in slides])}"), list[_slide_type])
+        else:
+            self._lu_sig = self._default_unit.insert(-1, "slides",
+                                                     dspy.OutputField(), _to_signature(slides))
         if kwargs:
             for key, val in kwargs.items():
                 if key.startswith("input_"):
                     key = key.removeprefix("input_")
-                    self._lu_sig = self._lu_sig.insert(-1, key, dspy.InputField(desc=val), str)
+                    self._lu_sig = self._lu_sig.insert(
+                        -1, key, dspy.InputField(desc=val), str)
                 else:
                     key = key.removeprefix("output_")
-                    self._lu_sig = self._lu_sig.insert(-1, key, dspy.OutputField(desc=val), str)
+                    self._lu_sig = self._lu_sig.insert(
+                        -1, key, dspy.OutputField(desc=val), str)
 
-    def set_dspy_module_predictor(self, module:type[Module]):
+    def set_dspy_module_predictor(self, module: type[Module]):
         """
         Lets you create a module as predictor. The output signature must cohere to the expected format:
          class Unit(Signature):
             title: str
             slides: list[type[Signature]] | type[Signature]
-        
+
         :param self: Description
         :param module: Description
         :type module: type[Module]
         """
         self.predictor = module()
         self.predictor.set_lm(self.LM)
+
 
 def _to_json(slides: list[Any] | Any, map=MAP):
     _slides = []

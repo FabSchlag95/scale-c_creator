@@ -41,7 +41,7 @@ class Creator:
         if signature_class:
             self._content_creator.set_lu_signature(signature_class)
         elif slide_dicts:
-            self._content_creator.set_lu_signature_with_json(slide_dicts, **additional_signature_props)
+            self._content_creator.set_lu_signature_with_json(slide_dicts,free_choice=True, **additional_signature_props)
         elif module_predictor:
             self._content_creator.set_dspy_module_predictor(module_predictor)    
         else:
